@@ -314,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateBracket() {
+        leagueSection.style.display = 'none';
         const inputs = document.querySelectorAll('.team-input');
         
         let participants = [];
