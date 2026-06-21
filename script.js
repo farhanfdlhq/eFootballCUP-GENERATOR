@@ -51,7 +51,11 @@ const translations = {
         gd: "GD",
         pts: "Pts",
         matchday_prefix: "Pekan ",
-        export_btn: "📸 Download"
+        export_btn: "📸 Download",
+        format_group: "Fase Grup + Knockout",
+        group_title: "Fase Grup",
+        advance_knockout: "🏆 Lanjut ke Knockout",
+        group_name: "Grup "
     },
     en: {
         desc: "Create your tournament bracket easily",
@@ -84,7 +88,11 @@ const translations = {
         gd: "GD",
         pts: "Pts",
         matchday_prefix: "Matchday ",
-        export_btn: "📸 Download"
+        export_btn: "📸 Download",
+        format_group: "Group Stage + Knockout",
+        group_title: "Group Stage",
+        advance_knockout: "🏆 Advance to Knockout",
+        group_name: "Group "
     }
 };
 
@@ -138,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generateBtn');
     const bracketSection = document.getElementById('bracketSection');
     const leagueSection = document.getElementById('leagueSection');
+    const groupSection = document.getElementById('groupSection');
     const bracketWrapper = document.getElementById('bracketWrapper');
     const shuffleCheckbox = document.getElementById('shuffleCheckbox');
     const twoLegCheckbox = document.getElementById('twoLegCheckbox');
@@ -147,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let tournamentRounds = [];
     let leagueFixtures = [];
     let leagueParticipants = [];
+    let groupData = [];
     let thirdPlaceWinner = { name: "Juara 3", isTBD: true };
     let thirdPlaceTeam1 = { name: "Kalah Semifinal 1", isTBD: true };
     let thirdPlaceTeam2 = { name: "Kalah Semifinal 2", isTBD: true };
@@ -170,9 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
             thirdPlaceTeam2,
             leagueFixtures,
             leagueParticipants,
+            groupData,
             lang: currentLang,
             bracketVisible: bracketSection.style.display === 'block',
-            leagueVisible: leagueSection.style.display === 'block'
+            leagueVisible: leagueSection.style.display === 'block',
+            groupVisible: groupSection.style.display === 'block'
         };
         localStorage.setItem('efootball_state', JSON.stringify(state));
     }
@@ -215,6 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderLeague();
                     leagueSection.style.display = 'block';
                     bracketSection.style.display = 'none';
+                    groupSection.style.display = 'none';
+                } else if (state.groupVisible && state.groupData && state.groupData.length > 0) {
+                    groupData = state.groupData;
+                    renderGroupStage();
+                    groupSection.style.display = 'block';
+                    bracketSection.style.display = 'none';
+                    leagueSection.style.display = 'none';
                 }
             } catch (e) {
                 console.error("Error loading state", e);
@@ -238,6 +257,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.value === 'league') {
             thirdPlaceCheckbox.parentElement.style.display = 'none';
             numParticipantsInput.min = "3";
+        } else if (e.target.value === 'group') {
+            thirdPlaceCheckbox.parentElement.style.display = 'inline-flex';
+            numParticipantsInput.min = "6";
+            if (parseInt(numParticipantsInput.value) < 6) {
+                numParticipantsInput.value = 6;
+                generateInputs(6);
+            }
         } else {
             thirdPlaceCheckbox.parentElement.style.display = 'inline-flex';
             numParticipantsInput.min = "4";
@@ -251,6 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', () => {
         if (tournamentFormat.value === 'league') {
             generateLeague();
+        } else if (tournamentFormat.value === 'group') {
+            generateGroupStage();
         } else {
             generateBracket();
         }
@@ -426,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generateBracket() {
         leagueSection.style.display = 'none';
+        groupSection.style.display = 'none';
         const inputs = document.querySelectorAll('.team-input');
         
         let participants = [];
@@ -644,8 +673,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LEAGUE LOGIC ---
+    function generateRoundRobin(participantsArray, isTwoLeg) {
+        let teams = [...participantsArray];
+        let numTeams = teams.length;
+        let dummyAdded = false;
+        
+        if (numTeams % 2 !== 0) {
+            teams.push({ name: "BYE", id: "BYE", dummy: true });
+            numTeams++;
+            dummyAdded = true;
+        }
+
+        let matchdays = [];
+        let half = numTeams / 2;
+
+        for (let round = 0; round < numTeams - 1; round++) {
+            let matchday = [];
+            for (let i = 0; i < half; i++) {
+                let t1 = teams[i];
+                let t2 = teams[numTeams - 1 - i];
+                
+                if (!t1.dummy && !t2.dummy) {
+                    if (i === 0 && round % 2 === 1) {
+                        matchday.push({ home: t2, away: t1, homeScore: null, awayScore: null, id: `md${round}_m${i}_${Math.random().toString(36).substr(2,5)}` });
+                    } else {
+                        matchday.push({ home: t1, away: t2, homeScore: null, awayScore: null, id: `md${round}_m${i}_${Math.random().toString(36).substr(2,5)}` });
+                    }
+                }
+            }
+            matchdays.push(matchday);
+            teams.splice(1, 0, teams.pop());
+        }
+
+        if (isTwoLeg) {
+            let numMatchdays = matchdays.length;
+            for (let i = 0; i < numMatchdays; i++) {
+                let returnMatchday = matchdays[i].map((m, idx) => ({
+                    home: m.away,
+                    away: m.home,
+                    homeScore: null,
+                    awayScore: null,
+                    id: `md${numMatchdays + i}_m${idx}_${Math.random().toString(36).substr(2,5)}`
+                }));
+                matchdays.push(returnMatchday);
+            }
+        }
+        
+        if (dummyAdded) {
+            // Remove dummy from participants if it was passed by reference
+            let idx = participantsArray.findIndex(p => p.dummy);
+            if (idx > -1) participantsArray.splice(idx, 1);
+        }
+        
+        return matchdays;
+    }
+
     function generateLeague() {
         bracketSection.style.display = 'none';
+        groupSection.style.display = 'none';
         
         const inputs = document.querySelectorAll('.team-input');
         leagueParticipants = [];
@@ -658,62 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
             leagueParticipants = leagueParticipants.sort(() => Math.random() - 0.5);
         }
 
-        let numTeams = leagueParticipants.length;
-        let dummyAdded = false;
-        
-        if (numTeams % 2 !== 0) {
-            leagueParticipants.push({ name: "BYE", id: "BYE", dummy: true });
-            numTeams++;
-            dummyAdded = true;
-        }
-
-        let matchdays = [];
-        let half = numTeams / 2;
-        let teams = [...leagueParticipants]; // copy
-
-        // Round Robin algorithm
-        for (let round = 0; round < numTeams - 1; round++) {
-            let matchday = [];
-            for (let i = 0; i < half; i++) {
-                let t1 = teams[i];
-                let t2 = teams[numTeams - 1 - i];
-                
-                // If neither is BYE
-                if (!t1.dummy && !t2.dummy) {
-                    // Alternate home/away based on round to be fair
-                    if (i === 0 && round % 2 === 1) {
-                        matchday.push({ home: t2, away: t1, homeScore: null, awayScore: null, id: `md${round}_m${i}` });
-                    } else {
-                        matchday.push({ home: t1, away: t2, homeScore: null, awayScore: null, id: `md${round}_m${i}` });
-                    }
-                }
-            }
-            matchdays.push(matchday);
-
-            // Rotate array (keep first element fixed)
-            teams.splice(1, 0, teams.pop());
-        }
-
-        if (twoLegCheckbox.checked) {
-            let numMatchdays = matchdays.length;
-            for (let i = 0; i < numMatchdays; i++) {
-                let returnMatchday = matchdays[i].map((m, idx) => ({
-                    home: m.away,
-                    away: m.home,
-                    homeScore: null,
-                    awayScore: null,
-                    id: `md${numMatchdays + i}_m${idx}`
-                }));
-                matchdays.push(returnMatchday);
-            }
-        }
-
-        // Clean up dummy team if it was added, just in case
-        if (dummyAdded) {
-            leagueParticipants = leagueParticipants.filter(p => !p.dummy);
-        }
-
-        leagueFixtures = matchdays;
+        leagueFixtures = generateRoundRobin(leagueParticipants, twoLegCheckbox.checked);
         renderLeague();
         
         leagueSection.style.display = 'block';
@@ -849,4 +879,273 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
         });
     }
+
+    // --- GROUP STAGE LOGIC ---
+    function generateGroupStage() {
+        bracketSection.style.display = 'none';
+        leagueSection.style.display = 'none';
+        
+        const inputs = document.querySelectorAll('.team-input');
+        let participants = [];
+        inputs.forEach((input, index) => {
+            let name = input.value.trim() || input.placeholder;
+            participants.push({ name, id: `p_${index}` });
+        });
+
+        if (shuffleCheckbox.checked) {
+            participants = participants.sort(() => Math.random() - 0.5);
+        }
+
+        let numTeams = participants.length;
+        let numGroups = 2;
+        if (numTeams >= 12 && numTeams < 24) numGroups = 4;
+        else if (numTeams >= 24) numGroups = 8;
+        
+        groupData = [];
+        const groupLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        for(let i=0; i<numGroups; i++) {
+            groupData.push({
+                name: groupLetters[i],
+                participants: [],
+                fixtures: [],
+                standings: {}
+            });
+        }
+        
+        // Distribute evenly
+        participants.forEach((p, index) => {
+            groupData[index % numGroups].participants.push(p);
+        });
+
+        groupData.forEach(g => {
+            g.fixtures = generateRoundRobin(g.participants, twoLegCheckbox.checked);
+            g.participants.forEach(p => {
+                g.standings[p.id] = { name: p.name, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 };
+            });
+        });
+
+        renderGroupStage();
+        groupSection.style.display = 'block';
+        
+        setTimeout(() => {
+            groupSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        
+        saveState();
+    }
+
+    function renderGroupStage() {
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = '';
+
+        groupData.forEach((g, gIndex) => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'glass-panel';
+            groupDiv.style.padding = '1.5rem';
+            
+            // Table
+            let tableHTML = `
+                <h3 style="color: var(--gold); text-align: center; margin-bottom: 1rem; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">${translations[currentLang].group_name} ${g.name}</h3>
+                <div class="table-responsive" style="margin-bottom: 2rem; overflow-x: auto;">
+                    <table class="standings-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="text-align: left;">${translations[currentLang].team}</th>
+                                <th>${translations[currentLang].played}</th>
+                                <th>${translations[currentLang].won}</th>
+                                <th>${translations[currentLang].drawn}</th>
+                                <th>${translations[currentLang].lost}</th>
+                                <th>${translations[currentLang].gf}</th>
+                                <th>${translations[currentLang].ga}</th>
+                                <th>${translations[currentLang].gd}</th>
+                                <th>${translations[currentLang].pts}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groupBody_${gIndex}"></tbody>
+                    </table>
+                </div>
+            `;
+
+            // Fixtures
+            let fixturesHTML = `<div class="fixtures-grid">`;
+            g.fixtures.forEach((md, roundIndex) => {
+                fixturesHTML += `<div class="matchday">
+                    <h3>${translations[currentLang].matchday_prefix} ${roundIndex + 1}</h3>`;
+                md.forEach(match => {
+                    fixturesHTML += `
+                    <div class="league-match">
+                        <div class="league-team home" title="${match.home.name}">${match.home.name}</div>
+                        <div class="score-inputs">
+                            <input type="number" class="score-input group-score" data-group="${gIndex}" data-match="${match.id}" data-side="home" min="0" value="${match.homeScore !== null ? match.homeScore : ''}">
+                            <span style="color: var(--gray); font-weight: bold;">-</span>
+                            <input type="number" class="score-input group-score" data-group="${gIndex}" data-match="${match.id}" data-side="away" min="0" value="${match.awayScore !== null ? match.awayScore : ''}">
+                        </div>
+                        <div class="league-team away" title="${match.away.name}">${match.away.name}</div>
+                    </div>`;
+                });
+                fixturesHTML += `</div>`;
+            });
+            fixturesHTML += `</div>`;
+
+            groupDiv.innerHTML = tableHTML + fixturesHTML;
+            container.appendChild(groupDiv);
+        });
+
+        document.querySelectorAll('.group-score').forEach(input => {
+            input.addEventListener('input', (e) => {
+                let gIndex = e.target.getAttribute('data-group');
+                let matchId = e.target.getAttribute('data-match');
+                let side = e.target.getAttribute('data-side');
+                let val = e.target.value === '' ? null : parseInt(e.target.value);
+                
+                let g = groupData[gIndex];
+                for (let md of g.fixtures) {
+                    for (let m of md) {
+                        if (m.id === matchId) {
+                            if (side === 'home') m.homeScore = val;
+                            else m.awayScore = val;
+                        }
+                    }
+                }
+                updateGroupStandings(gIndex);
+                saveState();
+            });
+        });
+
+        groupData.forEach((_, i) => updateGroupStandings(i));
+    }
+
+    function updateGroupStandings(gIndex) {
+        let g = groupData[gIndex];
+        
+        // Reset
+        Object.keys(g.standings).forEach(k => {
+            g.standings[k] = { ...g.standings[k], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 };
+        });
+
+        g.fixtures.forEach(md => {
+            md.forEach(match => {
+                if (match.homeScore !== null && match.awayScore !== null) {
+                    let s1 = g.standings[match.home.id];
+                    let s2 = g.standings[match.away.id];
+                    let hScore = match.homeScore;
+                    let aScore = match.awayScore;
+
+                    s1.p++; s2.p++;
+                    s1.gf += hScore; s2.gf += aScore;
+                    s1.ga += aScore; s2.ga += hScore;
+
+                    if (hScore > aScore) {
+                        s1.w++; s1.pts += 3;
+                        s2.l++;
+                    } else if (hScore < aScore) {
+                        s2.w++; s2.pts += 3;
+                        s1.l++;
+                    } else {
+                        s1.d++; s1.pts += 1;
+                        s2.d++; s2.pts += 1;
+                    }
+                    
+                    s1.gd = s1.gf - s1.ga;
+                    s2.gd = s2.gf - s2.ga;
+                }
+            });
+        });
+
+        let tableData = Object.values(g.standings).sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.gd !== a.gd) return b.gd - a.gd;
+            if (b.gf !== a.gf) return b.gf - a.gf;
+            return a.name.localeCompare(b.name);
+        });
+
+        g.sortedStandings = tableData;
+
+        const tbody = document.getElementById(`groupBody_${gIndex}`);
+        tbody.innerHTML = '';
+        tableData.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            if (index < 2) tr.style.background = 'rgba(0, 255, 0, 0.05)';
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="text-align: left; font-weight: 600;">${row.name}</td>
+                <td>${row.p}</td>
+                <td>${row.w}</td>
+                <td>${row.d}</td>
+                <td>${row.l}</td>
+                <td>${row.gf}</td>
+                <td>${row.ga}</td>
+                <td>${row.gd}</td>
+                <td style="font-weight: bold; color: var(--gold);">${row.pts}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById('advanceToKnockoutBtn').addEventListener('click', () => {
+        let qualified = [];
+        groupData.forEach(g => {
+            if (g.sortedStandings && g.sortedStandings.length >= 2) {
+                qualified.push({
+                    group: g.name,
+                    first: g.sortedStandings[0].name,
+                    second: g.sortedStandings[1].name
+                });
+            }
+        });
+        
+        if (qualified.length < 2) {
+            alert(currentLang === 'id' ? "Harap selesaikan beberapa pertandingan dulu." : "Please finish some matches first.");
+            return;
+        }
+
+        let bracketMatches = [];
+        if (qualified.length === 2) { // Groups A, B
+            bracketMatches.push([ { name: qualified[0].first, isTBD: false }, { name: qualified[1].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[1].first, isTBD: false }, { name: qualified[0].second, isTBD: false } ]);
+        } else if (qualified.length === 4) { // A, B, C, D
+            bracketMatches.push([ { name: qualified[0].first, isTBD: false }, { name: qualified[1].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[2].first, isTBD: false }, { name: qualified[3].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[1].first, isTBD: false }, { name: qualified[0].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[3].first, isTBD: false }, { name: qualified[2].second, isTBD: false } ]);
+        } else if (qualified.length === 8) { // A to H
+            bracketMatches.push([ { name: qualified[0].first, isTBD: false }, { name: qualified[1].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[2].first, isTBD: false }, { name: qualified[3].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[4].first, isTBD: false }, { name: qualified[5].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[6].first, isTBD: false }, { name: qualified[7].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[1].first, isTBD: false }, { name: qualified[0].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[3].first, isTBD: false }, { name: qualified[2].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[5].first, isTBD: false }, { name: qualified[4].second, isTBD: false } ]);
+            bracketMatches.push([ { name: qualified[7].first, isTBD: false }, { name: qualified[6].second, isTBD: false } ]);
+        }
+
+        let totalRounds = Math.log2(bracketMatches.length * 2);
+        let rounds = [bracketMatches];
+        for (let r = 1; r < totalRounds; r++) {
+            let prevRound = rounds[r-1];
+            let currentRound = [];
+            for (let i = 0; i < prevRound.length; i += 2) {
+                currentRound.push([ { name: "TBD", isTBD: true }, { name: "TBD", isTBD: true } ]);
+            }
+            rounds.push(currentRound);
+        }
+        rounds.push([ { winner: true, name: "Juara", isTBD: true } ]);
+        
+        tournamentRounds = rounds;
+        thirdPlaceWinner = { name: "Juara 3", isTBD: true };
+        thirdPlaceTeam1 = { name: "Kalah Semifinal 1", isTBD: true };
+        thirdPlaceTeam2 = { name: "Kalah Semifinal 2", isTBD: true };
+        
+        groupSection.style.display = 'none';
+        bracketSection.style.display = 'block';
+        
+        renderBracket(tournamentRounds);
+        
+        setTimeout(() => {
+            bracketSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        
+        saveState();
+    });
 });
