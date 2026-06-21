@@ -286,11 +286,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        if(confirm(currentLang === 'id' ? "Apakah Anda yakin ingin menghapus SEMUA data turnamen ini?" : "Are you sure you want to delete ALL tournament data?")) {
-            localStorage.removeItem('efootball_state');
-            location.reload();
+    // --- CUSTOM MODAL ---
+    function showModal(message, isConfirm = false, onConfirm = null) {
+        const modal = document.getElementById('customModal');
+        const titleEl = document.getElementById('modalTitle');
+        const msgEl = document.getElementById('modalMessage');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+
+        titleEl.textContent = currentLang === 'id' ? "Perhatian" : "Attention";
+        msgEl.textContent = message;
+        
+        cancelBtn.textContent = currentLang === 'id' ? "Batal" : "Cancel";
+        
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        if (isConfirm) {
+            newCancelBtn.style.display = 'block';
+            newConfirmBtn.className = 'btn-danger';
+            newConfirmBtn.textContent = currentLang === 'id' ? "Hapus" : "Delete";
+        } else {
+            newCancelBtn.style.display = 'none';
+            newConfirmBtn.className = 'btn-primary';
+            newConfirmBtn.textContent = "OK";
         }
+
+        newConfirmBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            if (onConfirm) onConfirm();
+        });
+
+        newCancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        showModal(
+            currentLang === 'id' ? "Apakah Anda yakin ingin menghapus SEMUA data turnamen ini?" : "Are you sure you want to delete ALL tournament data?",
+            true,
+            () => {
+                localStorage.removeItem('efootball_state');
+                location.reload();
+            }
+        );
     });
 
     // Zoom logic
@@ -1105,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (qualified.length < 2) {
-            alert(currentLang === 'id' ? "Harap selesaikan beberapa pertandingan dulu." : "Please finish some matches first.");
+            showModal(currentLang === 'id' ? "Harap selesaikan beberapa pertandingan dulu sebelum melaju ke Knockout." : "Please finish some matches first before advancing.");
             return;
         }
 
