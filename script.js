@@ -247,6 +247,27 @@ document.addEventListener('DOMContentLoaded', () => {
     generateInputs(parseInt(numParticipantsInput.value));
     loadState(); // Load saved tournament on init
 
+    const minusBtn = document.getElementById('minusBtn');
+    const plusBtn = document.getElementById('plusBtn');
+
+    minusBtn.addEventListener('click', () => {
+        let val = parseInt(numParticipantsInput.value);
+        let min = parseInt(numParticipantsInput.min) || 4;
+        if (val > min) {
+            numParticipantsInput.value = val - 1;
+            numParticipantsInput.dispatchEvent(new Event('input'));
+        }
+    });
+
+    plusBtn.addEventListener('click', () => {
+        let val = parseInt(numParticipantsInput.value);
+        let max = parseInt(numParticipantsInput.max) || 64;
+        if (val < max) {
+            numParticipantsInput.value = val + 1;
+            numParticipantsInput.dispatchEvent(new Event('input'));
+        }
+    });
+
     numParticipantsInput.addEventListener('input', (e) => {
         let count = parseInt(e.target.value);
         let minCount = tournamentFormat.value === 'league' ? 3 : 4;

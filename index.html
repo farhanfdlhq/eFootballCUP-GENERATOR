@@ -52,7 +52,11 @@
 
                 <div class="form-group">
                     <label for="numParticipants" data-i18n="num_participants">Jumlah Peserta</label>
-                    <input type="number" id="numParticipants" min="3" value="4" class="num-input">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 5px;">
+                        <button id="minusBtn" class="qty-btn">-</button>
+                        <input type="number" id="numParticipants" class="num-input" min="4" max="64" value="4" style="text-align: center; width: 100px; margin: 0; font-size: 1.5rem;">
+                        <button id="plusBtn" class="qty-btn">+</button>
+                    </div>
                 </div>
 
                 <div class="participants-container">
