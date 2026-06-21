@@ -18,17 +18,133 @@
     }
 })();
 
+// Translations
+const translations = {
+    id: {
+        desc: "Buat bagan turnamen mabarmu dengan mudah",
+        num_participants: "Jumlah Peserta",
+        participant_names: "Nama Peserta / Tim",
+        type_names: "Ketik nama peserta",
+        two_leg: "2 Leg (Kandang-Tandang)",
+        third_place: "Perebutan Juara 3",
+        shuffle: "Acak Posisi",
+        generate: "Generate Bagan",
+        bracket_title: "Bagan Turnamen",
+        participant_prefix: "Peserta ",
+        third_place_match: "JUARA 3",
+        champion: "Juara",
+        loser_semi_1: "Kalah Semifinal 1",
+        loser_semi_2: "Kalah Semifinal 2",
+        two_leg_badge: "2 LEG",
+        format_label: "Format Turnamen",
+        format_knockout: "Sistem Gugur (Knockout)",
+        format_league: "Klasemen Liga (Round Robin)",
+        standings_title: "Klasemen Liga",
+        fixtures_title: "Jadwal Pertandingan",
+        team: "Tim",
+        played: "P",
+        won: "W",
+        drawn: "D",
+        lost: "L",
+        gf: "GF",
+        ga: "GA",
+        gd: "GD",
+        pts: "Pts",
+        matchday_prefix: "Pekan "
+    },
+    en: {
+        desc: "Create your tournament bracket easily",
+        num_participants: "Number of Participants",
+        participant_names: "Participant / Team Names",
+        type_names: "Type participant names",
+        two_leg: "2 Legs (Home & Away)",
+        third_place: "3rd Place Play-off",
+        shuffle: "Shuffle Positions",
+        generate: "Generate Bracket",
+        bracket_title: "Tournament Bracket",
+        participant_prefix: "Participant ",
+        third_place_match: "3RD PLACE",
+        champion: "Champion",
+        loser_semi_1: "Loser Semi 1",
+        loser_semi_2: "Loser Semi 2",
+        two_leg_badge: "2 LEGS",
+        format_label: "Tournament Format",
+        format_knockout: "Knockout Bracket",
+        format_league: "League Standings (Round Robin)",
+        standings_title: "League Standings",
+        fixtures_title: "Match Fixtures",
+        team: "Team",
+        played: "P",
+        won: "W",
+        drawn: "D",
+        lost: "L",
+        gf: "GF",
+        ga: "GA",
+        gd: "GD",
+        pts: "Pts",
+        matchday_prefix: "Matchday "
+    }
+};
+
+let currentLang = 'id';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    
+    // Update all data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        }
+    });
+
+    // Update active button styles
+    document.getElementById('lang-id').classList.toggle('active', lang === 'id');
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+    // Update placeholders
+    const inputs = document.querySelectorAll('.team-input');
+    inputs.forEach((input, index) => {
+        input.placeholder = `${translations[lang].participant_prefix}${index + 1}`;
+    });
+
+    // Update existing 3rd place box if generated
+    const thirdPlaceLabels = document.querySelectorAll('.match-3rd .match-teams > div:first-child');
+    thirdPlaceLabels.forEach(label => {
+        label.textContent = translations[lang].third_place_match;
+    });
+
+    // Re-render bracket to instantly update labels inside the bracket
+    if (typeof tournamentRounds !== 'undefined' && tournamentRounds.length > 0) {
+        renderBracket(tournamentRounds);
+    }
+    
+    // Re-render league if exists
+    if (typeof leagueFixtures !== 'undefined' && leagueFixtures.length > 0) {
+        renderLeague();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Language switchers
+    document.getElementById('lang-id').addEventListener('click', () => setLanguage('id'));
+    document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
     const numParticipantsInput = document.getElementById('numParticipants');
     const participantInputsContainer = document.getElementById('participantInputs');
     const generateBtn = document.getElementById('generateBtn');
     const bracketSection = document.getElementById('bracketSection');
+    const leagueSection = document.getElementById('leagueSection');
     const bracketWrapper = document.getElementById('bracketWrapper');
     const shuffleCheckbox = document.getElementById('shuffleCheckbox');
     const twoLegCheckbox = document.getElementById('twoLegCheckbox');
     const thirdPlaceCheckbox = document.getElementById('thirdPlaceCheckbox');
+    const tournamentFormat = document.getElementById('tournamentFormat');
 
     let tournamentRounds = [];
+    let leagueFixtures = [];
+    let leagueParticipants = [];
     let thirdPlaceWinner = { name: "Juara 3", isTBD: true };
     let thirdPlaceTeam1 = { name: "Kalah Semifinal 1", isTBD: true };
     let thirdPlaceTeam2 = { name: "Kalah Semifinal 2", isTBD: true };
@@ -38,12 +154,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     numParticipantsInput.addEventListener('input', (e) => {
         let count = parseInt(e.target.value);
-        if (count >= 4) {
+        let minCount = tournamentFormat.value === 'league' ? 3 : 4;
+        if (count >= minCount) {
             generateInputs(count);
         }
     });
 
-    generateBtn.addEventListener('click', generateBracket);
+    tournamentFormat.addEventListener('change', (e) => {
+        if (e.target.value === 'league') {
+            thirdPlaceCheckbox.parentElement.style.display = 'none';
+            numParticipantsInput.min = "3";
+        } else {
+            thirdPlaceCheckbox.parentElement.style.display = 'inline-flex';
+            numParticipantsInput.min = "4";
+            if (parseInt(numParticipantsInput.value) < 4) {
+                numParticipantsInput.value = 4;
+                generateInputs(4);
+            }
+        }
+    });
+
+    generateBtn.addEventListener('click', () => {
+        if (tournamentFormat.value === 'league') {
+            generateLeague();
+        } else {
+            generateBracket();
+        }
+    });
 
     // Zoom logic
     let currentZoom = 1;
@@ -162,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.placeholder = `Peserta ${i + 1}`;
+                input.placeholder = `${translations[currentLang].participant_prefix}${i + 1}`;
                 input.className = 'team-input';
                 
                 wrapper.appendChild(iconDiv);
@@ -181,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let participants = [];
         inputs.forEach((input, index) => {
-            let name = input.value.trim() || `Peserta ${index + 1}`;
+            let name = input.value.trim() || input.placeholder;
             participants.push({ name });
         });
 
@@ -310,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         let class2 = match[1].isTBD ? '' : 'team-clickable';
                         
                         let twoLegBadge = (twoLegCheckbox.checked && roundIndex < totalRounds - 1) 
-                            ? `<div style="position: absolute; top: -10px; right: -5px; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10;">2 LEG</div>` 
+                            ? `<div style="position: absolute; top: -10px; right: -5px; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10;">${translations[currentLang].two_leg_badge}</div>` 
                             : '';
                             
                         matchDiv.innerHTML = `
@@ -329,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 // Winner
-                let winnerName = roundData[0].name;
+                let winnerName = roundData[0].isTBD ? translations[currentLang].champion : roundData[0].name;
                 let winnerStyle = roundData[0].isTBD ? 'color: var(--gray); font-style: italic;' : 'color: var(--gold); font-weight: bold;';
                 
                 const matchDiv = document.createElement('div');
@@ -357,12 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const thirdPlaceHTML = `
                         <div class="match-teams" style="border-color: var(--gray);">
-                            <div style="font-size: 0.6rem; text-align: center; background: rgba(255,255,255,0.1); padding: 4px; font-weight: bold; letter-spacing: 1px;">JUARA 3</div>
+                            <div style="font-size: 0.6rem; text-align: center; background: rgba(255,255,255,0.1); padding: 4px; font-weight: bold; letter-spacing: 1px;">${translations[currentLang].third_place_match}</div>
                             <div class="team ${class1}" data-team="0" style="${pointer1}">
-                                <div class="team-name" style="${tp1Style}">${thirdPlaceTeam1.name}</div>
+                                <div class="team-name" style="${tp1Style}">${thirdPlaceTeam1.isTBD ? translations[currentLang].loser_semi_1 : thirdPlaceTeam1.name}</div>
                             </div>
                             <div class="team ${class2}" data-team="1" style="${pointer2}">
-                                <div class="team-name" style="${tp2Style}">${thirdPlaceTeam2.name}</div>
+                                <div class="team-name" style="${tp2Style}">${thirdPlaceTeam2.isTBD ? translations[currentLang].loser_semi_2 : thirdPlaceTeam2.name}</div>
                             </div>
                             ${!thirdPlaceWinner.isTBD ? `
                             <div class="team" style="border-top: 1px solid rgba(255,255,255,0.1); justify-content: center; background: rgba(250, 204, 21, 0.1);">
@@ -390,5 +527,209 @@ document.addEventListener('DOMContentLoaded', () => {
         
         bracketWrapper.appendChild(bracket);
         updateZoom(); // Apply current zoom after render
+    }
+
+    // --- LEAGUE LOGIC ---
+    function generateLeague() {
+        bracketSection.style.display = 'none';
+        
+        const inputs = document.querySelectorAll('.team-input');
+        leagueParticipants = [];
+        inputs.forEach((input, index) => {
+            let name = input.value.trim() || input.placeholder;
+            leagueParticipants.push({ name, id: index });
+        });
+
+        if (shuffleCheckbox.checked) {
+            leagueParticipants = leagueParticipants.sort(() => Math.random() - 0.5);
+        }
+
+        let numTeams = leagueParticipants.length;
+        let dummyAdded = false;
+        
+        if (numTeams % 2 !== 0) {
+            leagueParticipants.push({ name: "BYE", id: "BYE", dummy: true });
+            numTeams++;
+            dummyAdded = true;
+        }
+
+        let matchdays = [];
+        let half = numTeams / 2;
+        let teams = [...leagueParticipants]; // copy
+
+        // Round Robin algorithm
+        for (let round = 0; round < numTeams - 1; round++) {
+            let matchday = [];
+            for (let i = 0; i < half; i++) {
+                let t1 = teams[i];
+                let t2 = teams[numTeams - 1 - i];
+                
+                // If neither is BYE
+                if (!t1.dummy && !t2.dummy) {
+                    // Alternate home/away based on round to be fair
+                    if (i === 0 && round % 2 === 1) {
+                        matchday.push({ home: t2, away: t1, homeScore: null, awayScore: null, id: `md${round}_m${i}` });
+                    } else {
+                        matchday.push({ home: t1, away: t2, homeScore: null, awayScore: null, id: `md${round}_m${i}` });
+                    }
+                }
+            }
+            matchdays.push(matchday);
+
+            // Rotate array (keep first element fixed)
+            teams.splice(1, 0, teams.pop());
+        }
+
+        if (twoLegCheckbox.checked) {
+            let numMatchdays = matchdays.length;
+            for (let i = 0; i < numMatchdays; i++) {
+                let returnMatchday = matchdays[i].map((m, idx) => ({
+                    home: m.away,
+                    away: m.home,
+                    homeScore: null,
+                    awayScore: null,
+                    id: `md${numMatchdays + i}_m${idx}`
+                }));
+                matchdays.push(returnMatchday);
+            }
+        }
+
+        // Clean up dummy team if it was added, just in case
+        if (dummyAdded) {
+            leagueParticipants = leagueParticipants.filter(p => !p.dummy);
+        }
+
+        leagueFixtures = matchdays;
+        renderLeague();
+        
+        leagueSection.style.display = 'block';
+        setTimeout(() => {
+            leagueSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
+    function renderLeague() {
+        const fixturesContainer = document.getElementById('fixturesContainer');
+        fixturesContainer.innerHTML = '';
+        
+        leagueFixtures.forEach((md, roundIndex) => {
+            const mdDiv = document.createElement('div');
+            mdDiv.className = 'matchday';
+            
+            const title = document.createElement('h3');
+            title.textContent = `${translations[currentLang].matchday_prefix} ${roundIndex + 1}`;
+            mdDiv.appendChild(title);
+            
+            md.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'league-match';
+                
+                matchDiv.innerHTML = `
+                    <div class="league-team home" title="${match.home.name}">${match.home.name}</div>
+                    <div class="score-inputs">
+                        <input type="number" class="score-input" data-match="${match.id}" data-side="home" min="0" value="${match.homeScore !== null ? match.homeScore : ''}">
+                        <span style="color: var(--gray); font-weight: bold;">-</span>
+                        <input type="number" class="score-input" data-match="${match.id}" data-side="away" min="0" value="${match.awayScore !== null ? match.awayScore : ''}">
+                    </div>
+                    <div class="league-team away" title="${match.away.name}">${match.away.name}</div>
+                `;
+                mdDiv.appendChild(matchDiv);
+            });
+            
+            fixturesContainer.appendChild(mdDiv);
+        });
+
+        // Add event listeners to score inputs
+        const scoreInputs = document.querySelectorAll('.score-input');
+        scoreInputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                let matchId = e.target.getAttribute('data-match');
+                let side = e.target.getAttribute('data-side');
+                let val = e.target.value === '' ? null : parseInt(e.target.value);
+                
+                // Find and update match
+                for (let md of leagueFixtures) {
+                    for (let m of md) {
+                        if (m.id === matchId) {
+                            if (side === 'home') m.homeScore = val;
+                            else m.awayScore = val;
+                        }
+                    }
+                }
+                updateStandings();
+            });
+        });
+
+        updateStandings(); // Initial render of table
+    }
+
+    function updateStandings() {
+        // Initialize standings data
+        let standings = {};
+        leagueParticipants.forEach(p => {
+            standings[p.id] = {
+                name: p.name,
+                p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0
+            };
+        });
+
+        // Compute from fixtures
+        leagueFixtures.forEach(md => {
+            md.forEach(match => {
+                if (match.homeScore !== null && match.awayScore !== null) {
+                    let s1 = standings[match.home.id];
+                    let s2 = standings[match.away.id];
+                    let hScore = match.homeScore;
+                    let aScore = match.awayScore;
+
+                    s1.p++; s2.p++;
+                    s1.gf += hScore; s2.gf += aScore;
+                    s1.ga += aScore; s2.ga += hScore;
+
+                    if (hScore > aScore) {
+                        s1.w++; s1.pts += 3;
+                        s2.l++;
+                    } else if (hScore < aScore) {
+                        s2.w++; s2.pts += 3;
+                        s1.l++;
+                    } else {
+                        s1.d++; s1.pts += 1;
+                        s2.d++; s2.pts += 1;
+                    }
+                    
+                    s1.gd = s1.gf - s1.ga;
+                    s2.gd = s2.gf - s2.ga;
+                }
+            });
+        });
+
+        // Convert to array and sort
+        let tableData = Object.values(standings).sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts; // 1. Points
+            if (b.gd !== a.gd) return b.gd - a.gd;    // 2. Goal Difference
+            if (b.gf !== a.gf) return b.gf - a.gf;    // 3. Goals For
+            return a.name.localeCompare(b.name);      // 4. Alphabetical
+        });
+
+        // Render table
+        const tbody = document.getElementById('standingsBody');
+        tbody.innerHTML = '';
+        
+        tableData.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="text-align: left; font-weight: 600;">${row.name}</td>
+                <td>${row.p}</td>
+                <td>${row.w}</td>
+                <td>${row.d}</td>
+                <td>${row.l}</td>
+                <td>${row.gf}</td>
+                <td>${row.ga}</td>
+                <td>${row.gd}</td>
+                <td style="font-weight: bold; color: var(--gold);">${row.pts}</td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 });

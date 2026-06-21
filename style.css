@@ -36,6 +36,38 @@ header {
     margin-bottom: 3rem;
 }
 
+.lang-switch {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lang-switch button {
+    background: transparent;
+    border: none;
+    color: var(--gray);
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.lang-switch button.active {
+    background: var(--gold);
+    color: var(--navy);
+}
+
+.lang-switch button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+}
+
 .main-logo {
     max-width: 280px;
     width: 100%;
@@ -428,6 +460,119 @@ header p {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--gold);
 }
+
+/* --- LEAGUE MODE STYLES --- */
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--white);
+    text-align: center;
+    min-width: 600px;
+}
+.standings-table th {
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.1);
+    color: var(--gold);
+    border-bottom: 2px solid var(--glass-border);
+    font-size: 0.95rem;
+}
+.standings-table td {
+    padding: 14px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 1.05rem;
+}
+.standings-table tbody tr:first-child td {
+    color: var(--gold);
+    font-weight: bold;
+    background: rgba(250, 204, 21, 0.1);
+}
+.standings-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.fixtures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.matchday {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.matchday h3 {
+    text-align: center;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.league-match {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+}
+.league-match:last-child {
+    border-bottom: none;
+}
+
+.league-team {
+    flex: 1;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+.league-team.home { text-align: right; }
+.league-team.away { text-align: left; }
+
+.score-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 15px;
+}
+
+.score-input {
+    width: 45px;
+    text-align: center;
+    background: var(--navy);
+    border: 1px solid var(--glass-border);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+.score-input:focus {
+    border-color: var(--gold);
+    outline: none;
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.3);
+}
+
+/* Hide arrow on number inputs */
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.score-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* ------------------------ */
 
 @media (max-width: 768px) {
     .app-container {
