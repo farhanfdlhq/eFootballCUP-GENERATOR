@@ -243,9 +243,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- CUSTOM SELECT LOGIC ---
+    const customSelect = document.getElementById('customFormatSelect');
+    const selectTrigger = customSelect.querySelector('.select-trigger');
+    const customOptions = customSelect.querySelectorAll('.custom-option');
+    const selectedFormatText = document.getElementById('selectedFormatText');
+
+    selectTrigger.addEventListener('click', (e) => {
+        customSelect.classList.toggle('open');
+        e.stopPropagation();
+    });
+
+    customOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            const value = option.getAttribute('data-value');
+            const i18nKey = option.getAttribute('data-i18n');
+            const text = option.textContent;
+            
+            // Update UI
+            customOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            selectedFormatText.setAttribute('data-i18n', i18nKey);
+            selectedFormatText.textContent = text;
+            
+            // Close dropdown
+            customSelect.classList.remove('open');
+            
+            // Update hidden input and trigger change
+            tournamentFormat.value = value;
+            tournamentFormat.dispatchEvent(new Event('change'));
+            
+            e.stopPropagation();
+        });
+    });
+
+    document.addEventListener('click', () => {
+        customSelect.classList.remove('open');
+    });
+
     // Initialize inputs
     generateInputs(parseInt(numParticipantsInput.value));
     loadState(); // Load saved tournament on init
+
+    // Sync custom select with loaded state
+    if (tournamentFormat.value) {
+        customOptions.forEach(opt => opt.classList.remove('selected'));
+        const activeOpt = Array.from(customOptions).find(opt => opt.getAttribute('data-value') === tournamentFormat.value);
+        if (activeOpt) {
+            activeOpt.classList.add('selected');
+            const i18nKey = activeOpt.getAttribute('data-i18n');
+            selectedFormatText.setAttribute('data-i18n', i18nKey);
+            selectedFormatText.textContent = translations[currentLang][i18nKey];
+        }
+    }
 
     const minusBtn = document.getElementById('minusBtn');
     const plusBtn = document.getElementById('plusBtn');

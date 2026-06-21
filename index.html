@@ -41,13 +41,20 @@
 
         <main>
             <section class="setup-section glass-panel">
-                <div class="form-group">
+                <div class="form-group custom-select-wrapper">
                     <label for="tournamentFormat" data-i18n="format_label">Format Turnamen</label>
-                    <select id="tournamentFormat" class="format-input">
-                        <option value="knockout" data-i18n="format_knockout">Sistem Gugur (Knockout)</option>
-                        <option value="league" data-i18n="format_league">Klasemen Liga (Round Robin)</option>
-                        <option value="group" data-i18n="format_group">Fase Grup + Knockout</option>
-                    </select>
+                    <div class="custom-select" id="customFormatSelect">
+                        <div class="select-trigger">
+                            <span id="selectedFormatText" data-i18n="format_knockout">Sistem Gugur (Knockout)</span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <div class="custom-option selected" data-value="knockout" data-i18n="format_knockout">Sistem Gugur (Knockout)</div>
+                            <div class="custom-option" data-value="league" data-i18n="format_league">Klasemen Liga (Round Robin)</div>
+                            <div class="custom-option" data-value="group" data-i18n="format_group">Fase Grup + Knockout</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="tournamentFormat" value="knockout">
                 </div>
 
                 <div class="form-group">
