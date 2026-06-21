@@ -469,15 +469,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!element) return;
         
         let oldZoom = 1;
+        let oldOverflowX = element.style.overflowX;
+        
         if (elementId === 'bracketWrapper') {
             oldZoom = currentZoom;
             currentZoom = 1;
             updateZoom();
+            // Force visible so html2canvas renders the full width
+            element.style.overflowX = 'visible';
+            element.style.width = 'max-content';
+        } else if (elementId === 'leagueSection') {
+            const tableResp = element.querySelector('.table-responsive');
+            if (tableResp) tableResp.style.overflowX = 'visible';
         }
 
         html2canvas(element, {
             backgroundColor: '#000028',
-            scale: 2
+            scale: 2,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = filename;
@@ -487,6 +499,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (elementId === 'bracketWrapper') {
                 currentZoom = oldZoom;
                 updateZoom();
+                element.style.overflowX = oldOverflowX;
+                element.style.width = '';
+            } else if (elementId === 'leagueSection') {
+                const tableResp = element.querySelector('.table-responsive');
+                if (tableResp) tableResp.style.overflowX = 'auto';
             }
         });
     }
