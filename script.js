@@ -50,7 +50,8 @@ const translations = {
         ga: "GA",
         gd: "GD",
         pts: "Pts",
-        matchday_prefix: "Pekan "
+        matchday_prefix: "Pekan ",
+        export_btn: "📸 Download"
     },
     en: {
         desc: "Create your tournament bracket easily",
@@ -82,7 +83,8 @@ const translations = {
         ga: "GA",
         gd: "GD",
         pts: "Pts",
-        matchday_prefix: "Matchday "
+        matchday_prefix: "Matchday ",
+        export_btn: "📸 Download"
     }
 };
 
@@ -149,8 +151,80 @@ document.addEventListener('DOMContentLoaded', () => {
     let thirdPlaceTeam1 = { name: "Kalah Semifinal 1", isTBD: true };
     let thirdPlaceTeam2 = { name: "Kalah Semifinal 2", isTBD: true };
 
+    // --- SAVE AND LOAD STATE ---
+    function saveState() {
+        const inputs = document.querySelectorAll('.team-input');
+        let inputNames = [];
+        inputs.forEach(input => inputNames.push(input.value));
+
+        const state = {
+            format: tournamentFormat.value,
+            num: numParticipantsInput.value,
+            inputNames,
+            shuffle: shuffleCheckbox.checked,
+            twoLeg: twoLegCheckbox.checked,
+            thirdPlace: thirdPlaceCheckbox.checked,
+            tournamentRounds,
+            thirdPlaceWinner,
+            thirdPlaceTeam1,
+            thirdPlaceTeam2,
+            leagueFixtures,
+            leagueParticipants,
+            lang: currentLang,
+            bracketVisible: bracketSection.style.display === 'block',
+            leagueVisible: leagueSection.style.display === 'block'
+        };
+        localStorage.setItem('efootball_state', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('efootball_state');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                if (state.lang) setLanguage(state.lang);
+                
+                if (state.format) {
+                    tournamentFormat.value = state.format;
+                    tournamentFormat.dispatchEvent(new Event('change'));
+                }
+                if (state.num) numParticipantsInput.value = state.num;
+                if (state.shuffle !== undefined) shuffleCheckbox.checked = state.shuffle;
+                if (state.twoLeg !== undefined) twoLegCheckbox.checked = state.twoLeg;
+                if (state.thirdPlace !== undefined) thirdPlaceCheckbox.checked = state.thirdPlace;
+                
+                generateInputs(parseInt(state.num) || 4);
+                const inputs = document.querySelectorAll('.team-input');
+                if (state.inputNames) {
+                    inputs.forEach((input, i) => {
+                        if (state.inputNames[i]) input.value = state.inputNames[i];
+                    });
+                }
+
+                if (state.bracketVisible && state.tournamentRounds && state.tournamentRounds.length > 0) {
+                    tournamentRounds = state.tournamentRounds;
+                    thirdPlaceWinner = state.thirdPlaceWinner;
+                    thirdPlaceTeam1 = state.thirdPlaceTeam1;
+                    thirdPlaceTeam2 = state.thirdPlaceTeam2;
+                    renderBracket(tournamentRounds);
+                    bracketSection.style.display = 'block';
+                    leagueSection.style.display = 'none';
+                } else if (state.leagueVisible && state.leagueFixtures && state.leagueFixtures.length > 0) {
+                    leagueFixtures = state.leagueFixtures;
+                    leagueParticipants = state.leagueParticipants;
+                    renderLeague();
+                    leagueSection.style.display = 'block';
+                    bracketSection.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Error loading state", e);
+            }
+        }
+    }
+
     // Initialize inputs
     generateInputs(parseInt(numParticipantsInput.value));
+    loadState(); // Load saved tournament on init
 
     numParticipantsInput.addEventListener('input', (e) => {
         let count = parseInt(e.target.value);
@@ -217,6 +291,41 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDown = false;
     let startX, startY, scrollLeft, scrollTop;
 
+    // --- DOWNLOAD IMAGE ---
+    const exportBracketBtn = document.getElementById('exportBracketBtn');
+    const exportLeagueBtn = document.getElementById('exportLeagueBtn');
+
+    function exportToImage(elementId, filename) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        let oldZoom = 1;
+        if (elementId === 'bracketWrapper') {
+            oldZoom = currentZoom;
+            currentZoom = 1;
+            updateZoom();
+        }
+
+        html2canvas(element, {
+            backgroundColor: '#000028',
+            scale: 2
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            if (elementId === 'bracketWrapper') {
+                currentZoom = oldZoom;
+                updateZoom();
+            }
+        });
+    }
+
+    if(exportBracketBtn) exportBracketBtn.addEventListener('click', () => exportToImage('bracketWrapper', 'efootball_bracket.png'));
+    if(exportLeagueBtn) exportLeagueBtn.addEventListener('click', () => exportToImage('leagueSection', 'efootball_standings.png'));
+    // ------------------------
+
     bracketWrapper.addEventListener('mousedown', (e) => {
         isDown = true;
         startX = e.pageX - bracketWrapper.offsetLeft;
@@ -261,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (t === 0 && !thirdPlaceTeam1.isTBD) thirdPlaceWinner = { name: thirdPlaceTeam1.name, isTBD: false };
             if (t === 1 && !thirdPlaceTeam2.isTBD) thirdPlaceWinner = { name: thirdPlaceTeam2.name, isTBD: false };
             renderBracket(tournamentRounds);
+            saveState();
         }
     });
 
@@ -283,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         renderBracket(tournamentRounds);
+        saveState();
     }
 
     function generateInputs(count) {
@@ -386,6 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             bracketSection.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+        
+        saveState();
     }
 
     function renderBracket(rounds) {
@@ -607,6 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             leagueSection.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+        
+        saveState();
     }
 
     function renderLeague() {
@@ -658,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 updateStandings();
+                saveState();
             });
         });
 
