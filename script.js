@@ -55,7 +55,8 @@ const translations = {
         format_group: "Fase Grup + Knockout",
         group_title: "Fase Grup",
         advance_knockout: "🏆 Lanjut ke Knockout",
-        group_name: "Grup "
+        group_name: "Grup ",
+        reset_btn: "Hapus Data Turnamen"
     },
     en: {
         desc: "Create your tournament bracket easily",
@@ -92,7 +93,8 @@ const translations = {
         format_group: "Group Stage + Knockout",
         group_title: "Group Stage",
         advance_knockout: "🏆 Advance to Knockout",
-        group_name: "Group "
+        group_name: "Group ",
+        reset_btn: "Reset Tournament Data"
     }
 };
 
@@ -281,6 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
             generateGroupStage();
         } else {
             generateBracket();
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if(confirm(currentLang === 'id' ? "Apakah Anda yakin ingin menghapus SEMUA data turnamen ini?" : "Are you sure you want to delete ALL tournament data?")) {
+            localStorage.removeItem('efootball_state');
+            location.reload();
         }
     });
 
