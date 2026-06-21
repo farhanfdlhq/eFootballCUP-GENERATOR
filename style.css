@@ -1,0 +1,494 @@
+:root {
+    --navy: #000096; /* eFootball Blue */
+    --navy-light: #0000C8; /* Lighter eFootball Blue */
+    --gold: #ffff00; /* eFootball Yellow */
+    --gold-hover: #e6e600;
+    --white: #FFFFFF;
+    --gray: #B0B5C0;
+    --bg: #000028; /* Very dark blue for body bg */
+    --glass-bg: rgba(0, 0, 150, 0.4);
+    --glass-border: rgba(255, 255, 0, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 50% 0%, #000096 0%, #000028 60%);
+    background-attachment: fixed;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.main-logo {
+    max-width: 280px;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.5rem;
+    /* Removed border-radius and box-shadow so the logo background blends perfectly with the page gradient */
+}
+
+header h1 {
+    color: var(--gold);
+    font-size: 3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 15px rgba(250, 204, 21, 0.3);
+}
+
+header p {
+    color: var(--gray);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-group label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.num-input {
+    background-color: var(--navy-light);
+    color: var(--white);
+    border: 2px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    width: 100px;
+}
+
+.num-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+}
+
+.participants-container {
+    margin-bottom: 2rem;
+}
+
+.participants-container h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    width: 100%;
+    background-color: var(--navy-light);
+    color: var(--white);
+    border: 1px solid var(--glass-border);
+    padding: 0.8rem 1rem;
+    padding-left: 2.8rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.input-icon {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--gold);
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    background-color: var(--gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.4);
+}
+
+/* Bracket Styles */
+.bracket-section {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.bracket-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.bracket-section h2 {
+    text-align: center;
+    color: var(--gold);
+    font-size: 2rem;
+}
+
+.bracket-wrapper {
+    display: flex;
+    justify-content: flex-start; /* Changed from center to fix scroll cutoff on mobile */
+    overflow-x: auto;
+    padding: 0 1rem 2rem 1rem; /* Add side padding for breathing room when scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    cursor: grab;
+}
+
+.bracket-wrapper:active {
+    cursor: grabbing;
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    background: var(--navy-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 4px;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.zoom-controls button {
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-size: 1.2rem;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.zoom-controls button:hover {
+    background: rgba(250, 204, 21, 0.2);
+    color: var(--gold);
+}
+
+#zoomLevel {
+    font-size: 0.9rem;
+    min-width: 45px;
+    text-align: center;
+    font-weight: bold;
+    user-select: none;
+}
+
+.bracket {
+    display: flex;
+    margin: 0 auto; /* Centers the bracket when smaller than wrapper */
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    margin-right: 50px;
+    position: relative;
+}
+
+.round:last-child {
+    margin-right: 0;
+}
+
+.match {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    padding: 15px 0;
+}
+
+/* Connecting Lines */
+.round:not(:last-child) .match::after {
+    content: '';
+    position: absolute;
+    right: -25px;
+    width: 25px;
+    border-top: 2px solid var(--glass-border);
+}
+
+.round:not(:last-child) .match:nth-child(odd)::after {
+    top: 50%;
+    height: 50%;
+    border-right: 2px solid var(--glass-border);
+    border-top-right-radius: 6px;
+}
+
+.round:not(:last-child) .match:nth-child(even)::after {
+    bottom: 50%;
+    height: 50%;
+    border-top: none;
+    border-bottom: 2px solid var(--glass-border);
+    border-right: 2px solid var(--glass-border);
+    border-bottom-right-radius: 6px;
+}
+
+.round:not(:last-child) .match:only-child::after {
+    height: 0;
+    border-right: none;
+    border-radius: 0;
+}
+
+.round:not(:first-child) .match::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 50%;
+    width: 25px;
+    border-top: 2px solid var(--glass-border);
+}
+
+.round-winner::before {
+    left: -25px;
+    top: 50%;
+    width: 25px;
+    border-top: 2px solid var(--glass-border);
+}
+
+.round-winner::after {
+    display: none !important;
+}
+
+.match-teams {
+    background: var(--navy-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    width: 100%;
+}
+
+.team:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.team:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.team-clickable:hover, .third-team-clickable:hover {
+    background-color: rgba(250, 204, 21, 0.1);
+}
+
+.match-3rd::after, .match-3rd::before {
+    display: none !important;
+}
+
+.team {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    height: 48px;
+}
+
+.team:last-child {
+    border-bottom: none;
+}
+
+.team-name {
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+/* Winner specific */
+.round-winner .match-teams {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+}
+
+.round-winner .team {
+    justify-content: center;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--navy-light);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    header p {
+        font-size: 0.95rem;
+    }
+    
+    .glass-panel {
+        padding: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    .inputs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .extra-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        width: 100%;
+        padding-left: 0.5rem;
+    }
+    
+    .num-input {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .bracket-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .round {
+        min-width: 180px; /* Slightly narrower so user sees next round */
+        margin-right: 30px; /* Reduce gap */
+    }
+    
+    /* Adjust connecting lines for narrower gap */
+    .round:not(:last-child) .match::after {
+        width: 15px;
+        right: -15px;
+    }
+    
+    .round:not(:first-child) .match::before,
+    .round-winner::before {
+        width: 15px;
+        left: -15px;
+    }
+}
