@@ -37,14 +37,15 @@ header {
 }
 
 .lang-switch {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: flex;
+    justify-content: flex-end;
     gap: 0;
     border: 1px solid var(--glass-border);
     border-radius: 6px;
     overflow: hidden;
+    margin-bottom: 1rem;
+    width: max-content;
+    margin-left: auto;
 }
 
 .lang-switch button {
@@ -123,10 +124,34 @@ header p {
     border-radius: 8px;
     text-align: center;
     transition: all 0.3s ease;
-    width: 100px;
+    width: 100%;
+    max-width: 150px;
+    box-sizing: border-box;
 }
 
 .num-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+}
+
+.format-input {
+    background-color: var(--navy-light);
+    color: var(--white);
+    border: 2px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.format-input:focus {
     outline: none;
     border-color: var(--gold);
     box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
@@ -603,11 +628,12 @@ header p {
         gap: 1rem;
         width: 100%;
         padding-left: 0.5rem;
+        box-sizing: border-box;
     }
     
-    .num-input {
+    .num-input, .format-input {
         width: 100%;
-        max-width: 200px;
+        max-width: 100%;
     }
 
     .btn-primary {
