@@ -623,6 +623,14 @@ header p {
     border-color: var(--gold);
 }
 
+.qty-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .num-input::-webkit-outer-spin-button,
 .num-input::-webkit-inner-spin-button {
     -webkit-appearance: none;

@@ -250,6 +250,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const minusBtn = document.getElementById('minusBtn');
     const plusBtn = document.getElementById('plusBtn');
 
+    function updateQtyButtonsState() {
+        let val = parseInt(numParticipantsInput.value);
+        let min = 4;
+        if (tournamentFormat.value === 'league') min = 3;
+        else if (tournamentFormat.value === 'group') min = 6;
+        
+        let max = parseInt(numParticipantsInput.max) || 64;
+
+        minusBtn.disabled = val <= min;
+        plusBtn.disabled = val >= max;
+    }
+
     minusBtn.addEventListener('click', () => {
         let val = parseInt(numParticipantsInput.value);
         let min = parseInt(numParticipantsInput.min) || 4;
@@ -268,12 +280,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    updateQtyButtonsState(); // Init button state
+
     numParticipantsInput.addEventListener('input', (e) => {
         let count = parseInt(e.target.value);
-        let minCount = tournamentFormat.value === 'league' ? 3 : 4;
+        let minCount = tournamentFormat.value === 'league' ? 3 : (tournamentFormat.value === 'group' ? 6 : 4);
         if (count >= minCount) {
             generateInputs(count);
         }
+        updateQtyButtonsState();
     });
 
     tournamentFormat.addEventListener('change', (e) => {
@@ -295,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateInputs(4);
             }
         }
+        updateQtyButtonsState();
     });
 
     generateBtn.addEventListener('click', () => {
