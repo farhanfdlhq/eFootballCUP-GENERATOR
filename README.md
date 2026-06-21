@@ -1,27 +1,36 @@
-# eFootball Cup Generator
+# 🏆 eFootball Cup Generator
 
-Sebuah *web application* sederhana berbasis Vanilla HTML, CSS, dan JavaScript untuk komunitas eFootball. Aplikasi ini memungkinkan pengguna membuat bagan turnamen (*Knockout/Bracket*) secara cepat, responsif, dan interaktif langsung dari *browser*, tanpa memerlukan koneksi API yang rumit.
+Alat pamungkas berbasis web untuk membuat dan mengelola bagan turnamen *eFootball* (atau game *esports* lainnya) bersama teman-teman komunitas (Mabar).
 
-## Fitur Utama
+Aplikasi ini dirancang menggunakan Vanilla HTML/CSS/JS tanpa *framework* berat, namun dilengkapi dengan fitur kelas atas yang mensimulasikan manajemen turnamen sesungguhnya.
 
-- **Sistem Turnamen Gugur (*Knockout*)**: Otomatis mengatur sistem *seeding* dan membuat slot "BYE" apabila jumlah peserta ganjil.
-- **Interaktif (Click-to-Advance)**: Pengguna cukup mengklik nama tim/peserta pada bagan untuk memindahkan mereka ke babak selanjutnya.
-- **Perebutan Juara 3**: Terdapat opsi sakelar untuk mengaktifkan perebutan tempat ketiga dari tim yang kalah di ronde semifinal.
-- **Pertandingan 2 Leg (Kandang-Tandang)**: Terdapat sakelar untuk menampilkan label "2 Leg" untuk turnamen berformat agregat.
-- **Responsif dan Nyaman di Layar Sentuh**: Mendukung fitur *drag & pan* (geser bagan) serta pengaturan *Zoom* (+/-) yang dioptimalkan untuk pengguna Mobile.
-- **Desain Premium (eFootball Theme)**: Skema warna (Navy & Yellow Gold) dan antarmuka (*glassmorphism*) yang elegan dan sejalan dengan identitas visual eFootball.
+## ✨ Fitur Unggulan
 
-## Cara Menggunakan
+- **🚀 3 Mode Turnamen Interaktif**:
+  1. **Sistem Gugur (Knockout)**: Bagan turnamen klasik layaknya Liga Champions. Sistem gugur dengan *seeding* otomatis.
+  2. **Klasemen Liga (Round Robin)**: Sistem poin penuh di mana semua tim saling bertemu. Tabel klasemen ter-update secara *real-time*.
+  3. **Fase Grup + Knockout (World Cup Style)**: Peserta dipecah ke beberapa grup, klasemen dihitung, lalu Juara & Runner-up otomatis melaju ke bagan sistem gugur!
+- **🌐 Bilingual (ID & EN)**: Mendukung Bahasa Indonesia dan Bahasa Inggris secara langsung tanpa perlu *reload* halaman.
+- **💾 Auto-Save (Save & Resume)**: Menggunakan teknologi `localStorage`. Progres turnamen dan skor tidak akan hilang meskipun *browser* tertutup atau ter-refresh.
+- **📸 Export to Image**: Tombol praktis untuk langsung mengunduh/menyimpan bagan atau papan klasemen menjadi gambar beresolusi tinggi (PNG) untuk di-share ke grup WhatsApp.
+- **📱 Mobile Friendly & Interaktif**: Mendukung kontrol layar sentuh (*Pan & Zoom*) pada bagan yang besar. Tampilan sangat presisi untuk layar HP.
+- **⚽ Aturan Sepakbola Asli**: Menyediakan opsi "2 Leg (Kandang-Tandang)" serta laga khusus "Perebutan Juara 3".
 
-1. Buka file `index.html` pada *browser* apa saja (Google Chrome, Safari, Firefox).
-2. Tentukan jumlah peserta turnamen. (Minimal 4 pemain).
-3. Masukkan nama masing-masing peserta di kolom yang tersedia.
-4. Sesuaikan opsi turnamen: *2 Leg*, *Perebutan Juara 3*, atau *Acak Posisi*.
-5. Klik tombol **Generate Bagan**.
-6. Gunakan kursor atau usap layar sentuh untuk menggeser (*pan*) bagan. Klik nama pemenang pertandingan untuk memajukannya ke babak selanjutnya hingga didapatkan Juara Utama.
+## 🛠️ Teknologi yang Digunakan
 
-## Teknologi yang Digunakan
+- **Frontend Core**: HTML5, CSS3, JavaScript (ES6+).
+- **Library Tambahan**: [html2canvas](https://html2canvas.hertzen.com/) (Untuk mengekspor tampilan UI menjadi gambar PNG).
+- **Desain**: Tema *Dark Mode* Premium (*Navy Blue & Gold*) dengan estetika khas *eFootball*, *Glassmorphism*, dan tipografi modern *Google Fonts (Outfit)*.
 
-- HTML5 (Semantic Structure)
-- CSS3 (Vanilla CSS, CSS Flexbox/Grid, Transform & Zoom)
-- Vanilla JavaScript (DOM Manipulation, Bracket generation algorithm)
+## 🚀 Cara Menjalankan Proyek (Local)
+
+1. *Clone repository* ini:
+   ```bash
+   git clone https://github.com/farhanfdlhq/eFootballCUP-GENERATOR.git
+   ```
+2. Buka folder proyek hasil clone tersebut.
+3. Karena ini menggunakan Vanilla JS murni, Anda bisa langsung melakukan klik ganda (*double click*) pada file `index.html` dan membukanya di *browser* apa saja (Chrome/Safari).
+4. (Opsional) Untuk pengalaman pengembangan terbaik, jalankan menggunakan ekstensi **Live Server** di VS Code.
+
+## 🌐 Live Demo
+👉 **[Mainkan Sekarang di Vercel](https://e-football-cup-generator.vercel.app/)**
